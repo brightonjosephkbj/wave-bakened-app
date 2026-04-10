@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: wave-backend
+    runtime: docker
+    plan: free
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        sync: false

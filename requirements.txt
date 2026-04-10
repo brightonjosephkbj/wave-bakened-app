@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-mail
+yt-dlp
+anthropic
+requests
+beautifulsoup4
+gunicorn
+flask-jwt-extended
