@@ -58,6 +58,44 @@ with anything the user needs. Be friendly and concise.""",
     )
     return jsonify({'reply': response.content[0].text})
 
+
+def get_tiktok_tikwm(url):
+    try:
+        r = requests.post("https://tikwm.com/api/", data={"url": url, "hd": 1}, timeout=15)
+        data = r.json()
+        if data.get("code") == 0:
+            d = data["data"]
+            return {
+                "title": d.get("title", "TikTok Video"),
+                "thumbnail": d.get("cover"),
+                "duration": str(d.get("duration", "")),
+                "uploader": d.get("author", {}).get("nickname", ""),
+                "site": "TikTok",
+                "formats": [],
+                "source": "tikwm",
+                "direct_url": d.get("hdplay") or d.get("play"),
+                "audio_url": d.get("music"),
+            }
+    except Exception as e:
+        print(f"[TikWM] {e}")
+    return None
+
+def get_youtube_stream(video_id, quality, fmt):
+    try:
+        api = get_piped_api()
+        r = requests.get(f"{api}/streams/{video_id}", timeout=10)
+        data = r.json()
+        if fmt in ("mp3", "m4a"):
+            streams = sorted(data.get("audioStreams", []), key=lambda x: x.get("bitrate", 0), reverse=True)
+            return streams[0]["url"] if streams else None
+        else:
+            streams = [s for s in data.get("videoStreams", []) if s.get("height", 0) <= int(quality)]
+            streams = sorted(streams, key=lambda x: x.get("height", 0), reverse=True)
+            return streams[0]["url"] if streams else None
+    except Exception as e:
+        print(f"[Piped stream] {e}")
+    return None
+
 @app.route('/download/info', methods=['POST'])
 
 def get_tiktok_info(url):
