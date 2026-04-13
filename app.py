@@ -59,6 +59,27 @@ with anything the user needs. Be friendly and concise.""",
     return jsonify({'reply': response.content[0].text})
 
 @app.route('/download/info', methods=['POST'])
+
+def get_tiktok_info(url):
+    try:
+        r = requests.get(f"https://tikwm.com/api/?url={url}", timeout=10)
+        data = r.json()
+        if data.get('code') == 0:
+            d = data['data']
+            return {
+                'title': d.get('title', 'TikTok Video'),
+                'thumbnail': d.get('cover'),
+                'duration': str(d.get('duration', '')),
+                'uploader': d.get('author', {}).get('nickname', ''),
+                'site': 'TikTok',
+                'formats': [],
+                'source': 'tikwm',
+                'direct_url': d.get('play')
+            }
+    except Exception as e:
+        print(f"[TikWM] {e}")
+    return None
+
 def get_info():
     url = request.json.get('url')
     try:
